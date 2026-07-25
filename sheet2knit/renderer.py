@@ -1,13 +1,15 @@
+from ast import pattern
+
 import svgwrite
 
 STITCH_PATH = (
-    "M 10 10 "
-    "L 30 40 "
-    "L 50 10"
+    "M 5 0 "
+    "L 30 35 "
+    "L 55 0"
 )
 
-STITCH_WIDTH = 60
-STITCH_HEIGHT = 50
+STITCH_WIDTH = 65
+STITCH_HEIGHT = 30
 
 
 def draw_stitch(dwg, x, y, colour):
@@ -16,7 +18,7 @@ def draw_stitch(dwg, x, y, colour):
             d=STITCH_PATH,
             fill="none",
             stroke=colour,
-            stroke_width=4,
+            stroke_width=12,
             stroke_linecap="round",
             stroke_linejoin="round",
             transform=f"translate({x},{y})"
@@ -25,8 +27,10 @@ def draw_stitch(dwg, x, y, colour):
 
 
 def draw_pattern(pattern, filename):
-    width = pattern.width * STITCH_WIDTH
-    height = pattern.height * STITCH_HEIGHT
+    margin = 10
+
+    width = pattern.width * STITCH_WIDTH + 40
+    height = pattern.height * STITCH_HEIGHT + 40
 
     dwg = svgwrite.Drawing(
         filename,
@@ -38,8 +42,8 @@ def draw_pattern(pattern, filename):
             colour = pattern[col, row]
 
             if colour is not None:
-                x = col * STITCH_WIDTH
-                y = row * STITCH_HEIGHT
+                x = margin + col * STITCH_WIDTH
+                y = margin + row * STITCH_HEIGHT
 
                 draw_stitch(
                     dwg,
