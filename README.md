@@ -4,7 +4,9 @@ Convert coloured spreadsheet patterns into SVG knitting charts.
 
 `sheet2knit` reads an Excel spreadsheet where each cell's background colour represents a stitch colour, then renders the pattern as a simple stockinette-style SVG visualization.
 
-The current renderer uses V-shaped stitches as the basic building block. The stitch appearance will evolve over time.
+The current renderer uses \/-shaped stitches as the basic building block. The stitch appearance will evolve over time.
+
+Some randomness in rotation and scale is applied, as well as some shading on the stich for a more realsitic look
 
 ## Features
 
@@ -46,13 +48,14 @@ pip install -r requirements.txt
 
 ## Usage
 
-Place your Excel pattern file in the project folder.
+Place your Excel pattern file in the project folder, replacing any existing ones. Name does matter, the program will pick the first one it can find
 
 Example:
 
 ```text
 sheet2knit/
-├── pattern.xlsx
+├── sample/
+|    └── <excelname>.xlsx
 ├── requirements.txt
 └── sheet2knit/
 ```
@@ -63,13 +66,13 @@ Run:
 python -m sheet2knit
 ```
 
-The program will generate:
+The program will generate in the same sample folder:
 
 ```text
-fabric.svg
+<excelname>.svg
 ```
 
-Open the SVG file in a browser / VS code / somwhere to view the knitted pattern.
+Open the SVG file in a browser / VS code / somewhere to view the pattern in a stockinette stich mock up.
 
 ## Input format
 
@@ -82,7 +85,7 @@ Example:
 | 🟥 | 🟥 | 🟦 |
 | 🟩 | 🟥 | 🟥 |
 
-Cell values are currently ignored. Only the background colours are used.
+Cell values are ignored. Only the background colours are used.
 
 ## Project structure
 
@@ -99,12 +102,21 @@ sheet2knit/
 └── README.md
 ```
 
+## AI usage note
+
+AI assistance was used through a browser-based chatbot as a conversational development aid for brainstorming, debugging, and reviewing implementation ideas.
+
+No autonomous coding agents or AI-assisted development workflows were used. All code was manually written, adapted, reviewed, and tested by the author.
+
+Documentation was AI-generated, and reviewed by the author.
+
 ## Development notes
 
 Future improvements:
 
 * More realistic stockinette stitch rendering
-* Better yarn texture and shading
-* Adjustable stitch size
+* Better yarn texture and shading -> shading partly done
+* Adjustable stitch size -> partly done, not fully tested
 * Support for more spreadsheet formats
 * Command-line options for output filename and rendering style
+* Make it a Docker container

@@ -9,9 +9,6 @@ def excel_rgb_to_hex(rgb):
 
     return "#" + rgb[-6:].lower()
 
-wb = load_workbook("test-pattern.xlsx")
-ws = wb.active
-
 def read_pattern(filename):
     wb = load_workbook(filename)
     ws = wb.active

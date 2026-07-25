@@ -1,19 +1,30 @@
+from sheet2knit import pattern
 import svgwrite
 import random
 
-STITCH_PATH = (
-    "M 0 0 "
-    "L 25 30 "
-    "M 35 30 "
-    "L 60 0"
-)
+def create_stockinette_stitch_path(settings):
+    """
+    Create a path for a single stitch.
+    Mimicks stockinette stitch, with open V shape
+    """
+    gap = settings.stitch_width * 0.1
 
-STITCH_WIDTH = 70
-STITCH_HEIGHT = 30
+    left_x = 0
+    middle_x = settings.stitch_width / 2
+    right_x = settings.stitch_width
 
-RANDOMIZE_STITCHES = True   # adds random rotation and scale to each stitch
-RANDOM_ROTATION = 3      # degrees
-RANDOM_SCALE = 0.07      # ±7%
+    top_y = 0
+    bottom_y = settings.stitch_height
+
+    return (
+        f"M {left_x} {top_y} "
+        f"L {middle_x - gap} {bottom_y} "
+        f"M {middle_x + gap} {bottom_y} "
+        f"L {right_x} {top_y}"
+    )
+
+def calculate_yarn_thickness(settings):
+    return settings.stitch_height * 0.4
 
 def darken_colour(hex_colour, factor=0.6):
     """
@@ -48,39 +59,45 @@ def lighten_colour(hex_colour, factor=1.35):
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
-def get_stitch_transform(x, y):
-    if not RANDOMIZE_STITCHES:
+def get_stitch_transform(x, y, settings):
+    """
+    Adds randomness to the stitch transform
+    """
+    if not settings.randomize:
         return f"translate({x},{y})"
 
     rotation = random.uniform(
-        -RANDOM_ROTATION,
-        RANDOM_ROTATION
+        -settings.random_rotation,
+        settings.random_rotation
     )
 
     scale = random.uniform(
-        1 - RANDOM_SCALE,
-        1 + RANDOM_SCALE
+        1 - settings.random_scale,
+        1 + settings.random_scale
     )
 
     return (
         f"translate({x},{y}) "
-        f"rotate({rotation},30,15) "
+        f"rotate({rotation},{settings.stitch_width/2},{settings.stitch_height/2}) "
         f"scale({scale})"
     )
 
 def add_offset_to_transform(transform, dx, dy):
     return f"{transform} translate({dx},{dy})"
 
-def draw_stitch(dwg, x, y, colour):
-    transform = get_stitch_transform(x, y)
+
+def draw_stockinette_stitch(dwg, x, y, colour, settings):
+    stich_path = create_stockinette_stitch_path(settings)
+    yarn_width = calculate_yarn_thickness(settings)
+    transform = get_stitch_transform(x, y, settings)
 
     # Shadow layer
     dwg.add(
         dwg.path(
-            d=STITCH_PATH,
+            d=stich_path,
             fill="none",
             stroke=darken_colour(colour),
-            stroke_width=14,
+            stroke_width=yarn_width+4,
             stroke_linecap="round",
             stroke_linejoin="round",
             transform=add_offset_to_transform(transform, 2, 3)
@@ -90,10 +107,10 @@ def draw_stitch(dwg, x, y, colour):
     # Highlight layer
     dwg.add(
         dwg.path(
-            d=STITCH_PATH,
+            d=stich_path,
             fill="none",
             stroke=lighten_colour(colour, 1.35),
-            stroke_width=11,
+            stroke_width=yarn_width+1,
             stroke_linecap="round",
             stroke_linejoin="round",
             transform=add_offset_to_transform(transform, -1, -1)
@@ -103,41 +120,58 @@ def draw_stitch(dwg, x, y, colour):
     # Main yarn layer
     dwg.add(
         dwg.path(
-            d=STITCH_PATH,
+            d=stich_path,
             fill="none",
             stroke=colour,
-            stroke_width=10,
+            stroke_width=yarn_width,
             stroke_linecap="round",
             stroke_linejoin="round",
             transform=transform
         )
     )
 
+def calculate_stitch_pitch(settings):
+    yarn_width = calculate_yarn_thickness(settings)
 
-def draw_pattern(pattern, filename):
-    margin = 10
+    # Extra room so thick yarn does not collide
+    return settings.stitch_width + yarn_width
 
-    width = pattern.width * STITCH_WIDTH + 40
-    height = pattern.height * STITCH_HEIGHT + 40
 
-    dwg = svgwrite.Drawing(
-        filename,
-        size=(f"{width}px", f"{height}px")
+def calculate_canvas_size(pattern, settings):
+    pitch = calculate_stitch_pitch(settings)
+
+    width = (
+        pattern.width * pitch * settings.stitch_x_spacing
+        + settings.margin * 2
     )
+
+    height = (
+        pattern.height * settings.stitch_height
+        + settings.margin * 2
+    )
+
+    return width, height
+
+
+def calculate_stitch_position(col, row, settings):
+    pitch = calculate_stitch_pitch(settings)
+
+    x = (settings.margin + col * pitch * settings.stitch_x_spacing)
+    y = (settings.margin + row * settings.stitch_height)
+
+    return x, y
+
+def draw_pattern(pattern, filename, settings):
+    width, height = calculate_canvas_size(pattern, settings)
+
+    dwg = svgwrite.Drawing(filename, size=(f"{width}px", f"{height}px"))
 
     for row in range(pattern.height):
         for col in range(pattern.width):
             colour = pattern[col, row]
 
             if colour is not None:
-                x = margin + col * STITCH_WIDTH
-                y = margin + row * STITCH_HEIGHT
-
-                draw_stitch(
-                    dwg,
-                    x,
-                    y,
-                    colour
-                )
+                x, y = calculate_stitch_position(col, row, settings)
+                draw_stockinette_stitch(dwg, x, y, colour, settings)
 
     dwg.save()
