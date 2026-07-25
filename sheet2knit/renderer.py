@@ -3,12 +3,13 @@ from ast import pattern
 import svgwrite
 
 STITCH_PATH = (
-    "M 5 0 "
-    "L 30 35 "
-    "L 55 0"
+    "M 0 0 "
+    "L 25 30 "
+    "M 35 30 "
+    "L 60 0"
 )
 
-STITCH_WIDTH = 65
+STITCH_WIDTH = 70
 STITCH_HEIGHT = 30
 
 
