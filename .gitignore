@@ -15,3 +15,4 @@ venv.bak/
 
 
 .~lock.test-pattern.xlsx#
+*.xlsx#
