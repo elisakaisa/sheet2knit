@@ -117,10 +117,12 @@ sheet2knit/
 ├── sample/
 ├── sheet2knit/
 │   ├── cli.py              # Command-line entry point
+│   ├── colors.py           # Helper methods for handling colors
 │   ├── reader.py           # Excel reader
 │   ├── pattern.py          # Pattern data model
 │   ├── render_settings.py  # Rendering settings
-│   └── renderer.py         # SVG renderer
+│   ├── renderer.py         # SVG renderer
+│   └── transforms.py       # Helper methods for handling transforms
 │
 ├── compose.yaml 
 ├── Dockerfile 

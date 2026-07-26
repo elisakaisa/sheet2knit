@@ -1,6 +1,8 @@
-from sheet2knit import pattern
 import svgwrite
 import random
+
+from .colors import adjust_colour
+from .transforms import add_offset_to_transform, get_stitch_transform
 
 def create_stockinette_stitch_path(settings):
     """
@@ -61,58 +63,6 @@ def create_stockinette_stitch_path(settings):
 
     return left_strand + right_strand
 
-def darken_colour(hex_colour, factor=0.6):
-    """
-    Make a hex colour darker.
-
-    factor:
-    1.0 = unchanged
-    0.0 = black
-    """
-    r = int(hex_colour[1:3], 16)
-    g = int(hex_colour[3:5], 16)
-    b = int(hex_colour[5:7], 16)
-
-    r = int(r * factor)
-    g = int(g * factor)
-    b = int(b * factor)
-
-    return f"#{r:02x}{g:02x}{b:02x}"
-
-def lighten_colour(hex_colour, factor=1.35):
-    """
-    Make a hex colour lighter.
-    """
-    r = int(hex_colour[1:3], 16)
-    g = int(hex_colour[3:5], 16)
-    b = int(hex_colour[5:7], 16)
-
-    r = min(int(r * factor), 255)
-    g = min(int(g * factor), 255)
-    b = min(int(b * factor), 255)
-
-    return f"#{r:02x}{g:02x}{b:02x}"
-
-
-def get_stitch_transform(x, y, settings):
-    """
-    Adds randomness to the stitch transform
-    """
-    if not settings.randomize:
-        return f"translate({x},{y})"
-
-    rotation = random.uniform(-settings.random_rotation, settings.random_rotation)
-    scale = random.uniform(1 - settings.random_scale, 1 + settings.random_scale)
-
-    return (
-        f"translate({x},{y}) "
-        f"rotate({rotation},{settings.stitch_width/2},{settings.stitch_height/2}) "
-        f"scale({scale})"
-    )
-
-def add_offset_to_transform(transform, dx, dy):
-    return f"{transform} translate({dx},{dy})"
-
 
 def draw_stockinette_stitch(dwg, x, y, colour, settings):
     stich_path = create_stockinette_stitch_path(settings)
@@ -128,14 +78,14 @@ def draw_stockinette_stitch(dwg, x, y, colour, settings):
             )
         )
 
-    # Shadow layer
-    draw_stitch_layer(darken_colour(colour), 1, 1)
+    layers = [
+        (adjust_colour(colour, 0.6), 1, 1),     # shadow layer
+        (adjust_colour(colour, 1.35), -1, -1),  # highlight layer
+        (colour, 0, 0),
+    ]
 
-    # Highlight layer
-    draw_stitch_layer(lighten_colour(colour, 1.35), -1, -1)
-
-    # Main yarn layer
-    draw_stitch_layer(colour)
+    for fill, dx, dy in layers:
+        draw_stitch_layer(fill, dx, dy)
 
 def calculate_stitch_pitch(settings):
     return settings.stitch_width + settings.stitch_width * settings.stitch_gap_ratio
