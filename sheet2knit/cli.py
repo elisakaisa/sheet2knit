@@ -14,22 +14,14 @@ def find_input_files():
     return files
 
 def main():
-    settings = RenderSettings(
-        stitch_width=70,
-        stitch_height=30,
-        randomize=True,
-    )
+    settings = RenderSettings()
 
     for input_file in find_input_files():
         pattern = read_pattern(input_file)
 
         output_file = input_file.with_suffix(".svg")
 
-        draw_pattern(
-            pattern,
-            output_file,
-            settings,
-        )
+        draw_pattern(pattern, output_file, settings)
 
         print(f"Created {output_file}")
 

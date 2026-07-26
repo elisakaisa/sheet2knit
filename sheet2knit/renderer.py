@@ -17,8 +17,8 @@ def create_stockinette_stitch_path(settings):
     w = settings.stitch_width
     h = settings.stitch_height
 
-    gap = w * settings.stitch_gap_ratio
-    thickness = w * settings.stitch_thickness_ratio
+    gap = settings.stitch_gap_ratio * min(w, h)
+    thickness = min(w, h) * settings.stitch_thickness_ratio
 
     def tapered_strand(x1, y1, x2, y2):
         # Direction vector
@@ -59,7 +59,7 @@ def create_stockinette_stitch_path(settings):
     left_strand = tapered_strand(0, 0, w / 2 - gap, h)
     right_strand = tapered_strand(w, 0, w / 2 + gap, h)
 
-    return (left_strand + right_strand)
+    return left_strand + right_strand
 
 def darken_colour(hex_colour, factor=0.6):
     """
@@ -118,35 +118,24 @@ def draw_stockinette_stitch(dwg, x, y, colour, settings):
     stich_path = create_stockinette_stitch_path(settings)
     transform = get_stitch_transform(x, y, settings)
 
-    # Shadow layer
-    dwg.add(
-        dwg.path(
-            d=stich_path,
-            fill=darken_colour(colour),
-            stroke="none",
-            transform=add_offset_to_transform(transform, 1, 1)
+    def draw_stitch_layer(fill_colour, offset_x=0, offset_y=0):
+        dwg.add(
+            dwg.path(
+                d=stich_path,
+                fill=fill_colour,
+                stroke="none",
+                transform=add_offset_to_transform(transform, offset_x, offset_y)
+            )
         )
-    )
+
+    # Shadow layer
+    draw_stitch_layer(darken_colour(colour), 1, 1)
 
     # Highlight layer
-    dwg.add(
-        dwg.path(
-            d=stich_path,
-            fill=lighten_colour(colour, 1.35),
-            stroke="none",
-            transform=add_offset_to_transform(transform, -1, -1)
-        )
-    )
+    draw_stitch_layer(lighten_colour(colour, 1.35), -1, -1)
 
     # Main yarn layer
-    dwg.add(
-        dwg.path(
-            d=stich_path,
-            fill=colour,
-            stroke="none",
-            transform=transform
-        )
-    )
+    draw_stitch_layer(colour)
 
 def calculate_stitch_pitch(settings):
     return settings.stitch_width + settings.stitch_width * settings.stitch_gap_ratio
@@ -155,15 +144,8 @@ def calculate_stitch_pitch(settings):
 def calculate_canvas_size(pattern, settings):
     pitch = calculate_stitch_pitch(settings)
 
-    width = (
-        pattern.width * pitch * settings.stitch_x_spacing
-        + settings.margin * 2
-    )
-
-    height = (
-        pattern.height * settings.stitch_height
-        + settings.margin * 2
-    )
+    width = pattern.width * pitch * settings.stitch_x_spacing + settings.margin * 2
+    height = pattern.height * settings.stitch_height + settings.margin * 2
 
     return width, height
 
@@ -171,8 +153,8 @@ def calculate_canvas_size(pattern, settings):
 def calculate_stitch_position(col, row, settings):
     pitch = calculate_stitch_pitch(settings)
 
-    x = (settings.margin + col * pitch * settings.stitch_x_spacing)
-    y = (settings.margin + row * settings.stitch_height)
+    x = settings.margin + col * pitch * settings.stitch_x_spacing
+    y = settings.margin + row * settings.stitch_height * settings.stitch_y_spacing
 
     return x, y
 
