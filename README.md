@@ -125,6 +125,7 @@ sheet2knit/
 ├── compose.yaml 
 ├── Dockerfile 
 ├── requirements.txt
+├── LICENSE
 └── README.md
 ```
 
@@ -145,3 +146,6 @@ Future improvements:
 * Adjustable stitch size -> partly done, not fully tested
 * Support for more spreadsheet formats
 * Command-line options for output filename and rendering style
+
+## License
+This project is licensed under the MIT License. See the `LICENSE` file for details.
