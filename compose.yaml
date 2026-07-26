@@ -1,0 +1,6 @@
+services:
+  sheet2knit:
+    build: .
+    container_name: sheet2knit
+    volumes:
+      - ./sample:/app/sample

@@ -4,9 +4,9 @@ Convert coloured spreadsheet patterns into SVG knitting charts.
 
 `sheet2knit` reads an Excel spreadsheet where each cell's background colour represents a stitch colour, then renders the pattern as a simple stockinette-style SVG visualization.
 
-The current renderer uses \/-shaped stitches as the basic building block. The stitch appearance will evolve over time.
+The current renderer uses V-shaped stitches as the basic building block. The stitch appearance will evolve over time.
 
-Some randomness in rotation and scale is applied, as well as some shading on the stich for a more realsitic look
+Some randomness in rotation and scale is applied, as well as some shading on the stich for a more realistic look.
 
 ## Features
 
@@ -15,10 +15,49 @@ Some randomness in rotation and scale is applied, as well as some shading on the
 * Outputs scalable SVG files
 * Keeps the pattern representation separate from the renderer
 
-## Setup
+## Quick start (Docker)
 
-Clone the repository and enter the project folder:
+Docker is the recommended way to run `sheet2knit`, as it requires no Python installation or dependency management.
 
+Clone the repository:
+```bash
+git clone https://github.com/elisakaisa/sheet2knit.git
+cd sheet2knit
+```
+
+Build the container:
+```bash
+docker compose build
+```
+
+Place one or more Excel pattern files in the sample directory:
+
+sheet2knit/
+├── sample/
+│   ├── mittens.xlsx
+│   └── socks.xlsx
+├── compose.yaml
+└── ...
+
+Run:
+```bash
+docker compose run --rm sheet2knit
+```
+
+An SVG file will be generated next to each input spreadsheet:
+
+sample/
+├── mittens.xlsx
+├── mittens.svg
+├── socks.xlsx
+└── socks.svg
+
+Open the generated SVG in a web browser, VS Code, or any SVG-compatible viewer.
+
+## Running locally with Python
+
+If you prefer not to use Docker:
+Clone the repository:
 ```bash
 git clone https://github.com/elisakaisa/sheet2knit.git
 cd sheet2knit
@@ -41,38 +80,17 @@ source .venv/bin/activate
 ```
 
 Install dependencies:
-
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
-
-Place your Excel pattern file in the project folder, replacing any existing ones. Name does matter, the program will pick the first one it can find
-
-Example:
-
-```text
-sheet2knit/
-├── sample/
-|    └── <excelname>.xlsx
-├── requirements.txt
-└── sheet2knit/
-```
-
-Run:
-
+Run the application:
 ```bash
-python -m sheet2knit
+python3 -m sheet2knit
 ```
 
-The program will generate in the same sample folder:
+The program searches the `sample` directory for `.xlsx` files and generates matching `.svg` files in the same location.
 
-```text
-<excelname>.svg
-```
-
-Open the SVG file in a browser / VS code / somewhere to view the pattern in a stockinette stich mock up.
 
 ## Input format
 
@@ -92,12 +110,16 @@ Cell values are ignored. Only the background colours are used.
 ```text
 sheet2knit/
 │
+├── sample/
 ├── sheet2knit/
-│   ├── cli.py        # Command-line entry point
-│   ├── reader.py     # Excel reader
-│   ├── pattern.py    # Pattern data model
-│   └── renderer.py   # SVG renderer
+│   ├── cli.py              # Command-line entry point
+│   ├── reader.py           # Excel reader
+│   ├── pattern.py          # Pattern data model
+│   ├── render_settings.py  # Rendering settings
+│   └── renderer.py         # SVG renderer
 │
+├── compose.yaml 
+├── Dockerfile 
 ├── requirements.txt
 └── README.md
 ```
@@ -119,4 +141,3 @@ Future improvements:
 * Adjustable stitch size -> partly done, not fully tested
 * Support for more spreadsheet formats
 * Command-line options for output filename and rendering style
-* Make it a Docker container

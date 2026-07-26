@@ -4,36 +4,34 @@ from .reader import read_pattern
 from .renderer import draw_pattern
 from pathlib import Path
 
-def find_input_file():
+def find_input_files():
     sample_folder = Path("sample")
-
-    files = list(sample_folder.glob("*.xlsx"))
+    files = sorted(sample_folder.glob("*.xlsx"))
 
     if not files:
-        raise FileNotFoundError("No .xlsx files found")
+        raise FileNotFoundError("No .xlsx files found in the sample directory.")
 
-    return files[0]
+    return files
 
 def main():
-    input_file = find_input_file()
-
-    pattern = read_pattern(input_file)
-
     settings = RenderSettings(
         stitch_width=70,
         stitch_height=30,
-        randomize=True
+        randomize=True,
     )
 
-    output_file = input_file.with_suffix(".svg")
+    for input_file in find_input_files():
+        pattern = read_pattern(input_file)
 
-    draw_pattern(
-        pattern,
-        output_file,
-        settings
-    )
+        output_file = input_file.with_suffix(".svg")
 
-    print(f"Created {output_file}")
+        draw_pattern(
+            pattern,
+            output_file,
+            settings,
+        )
+
+        print(f"Created {output_file}")
 
 
 if __name__ == "__main__":
