@@ -45,21 +45,21 @@ def create_stockinette_stitch_path(settings):
             left.append((x + nx * width, y + ny * width))
             right.append((x - nx * width, y - ny * width))
 
-        points = left + right[::-1]
-
+        # Use quadratic curves
         return (
-            f"M {points[0][0]} {points[0][1]} "
-            + " ".join(
-                f"L {x} {y}"
-                for x, y in points[1:]
-            )
-            + " Z "
+            f"M {left[0][0]} {left[0][1]} "
+            f"Q {left[1][0]} {left[1][1]} "
+            f"{left[2][0]} {left[2][1]} "
+            f"L {right[2][0]} {right[2][1]} "
+            f"Q {right[1][0]} {right[1][1]} "
+            f"{right[0][0]} {right[0][1]} "
+            "Z"
         )
 
-    return (tapered_strand(0, 0, w / 2 - gap, h) + tapered_strand(w, 0, w / 2 + gap, h))
+    left_strand = tapered_strand(0, 0, w / 2 - gap, h)
+    right_strand = tapered_strand(w, 0, w / 2 + gap, h)
 
-def calculate_yarn_thickness(settings):
-    return settings.stitch_height * 0.4
+    return (left_strand + right_strand)
 
 def darken_colour(hex_colour, factor=0.6):
     """
@@ -116,19 +116,15 @@ def add_offset_to_transform(transform, dx, dy):
 
 def draw_stockinette_stitch(dwg, x, y, colour, settings):
     stich_path = create_stockinette_stitch_path(settings)
-    yarn_width = calculate_yarn_thickness(settings)
     transform = get_stitch_transform(x, y, settings)
 
     # Shadow layer
     dwg.add(
         dwg.path(
             d=stich_path,
-            fill="none",
-            stroke=darken_colour(colour),
-            stroke_width=yarn_width+4,
-            stroke_linecap="round",
-            stroke_linejoin="round",
-            transform=add_offset_to_transform(transform, 2, 3)
+            fill=darken_colour(colour),
+            stroke="none",
+            transform=add_offset_to_transform(transform, 1, 1)
         )
     )
 
@@ -136,11 +132,8 @@ def draw_stockinette_stitch(dwg, x, y, colour, settings):
     dwg.add(
         dwg.path(
             d=stich_path,
-            fill="none",
-            stroke=lighten_colour(colour, 1.35),
-            stroke_width=yarn_width+1,
-            stroke_linecap="round",
-            stroke_linejoin="round",
+            fill=lighten_colour(colour, 1.35),
+            stroke="none",
             transform=add_offset_to_transform(transform, -1, -1)
         )
     )
@@ -149,20 +142,14 @@ def draw_stockinette_stitch(dwg, x, y, colour, settings):
     dwg.add(
         dwg.path(
             d=stich_path,
-            fill="none",
-            stroke=colour,
-            stroke_width=yarn_width,
-            stroke_linecap="round",
-            stroke_linejoin="round",
+            fill=colour,
+            stroke="none",
             transform=transform
         )
     )
 
 def calculate_stitch_pitch(settings):
-    yarn_width = calculate_yarn_thickness(settings)
-
-    # Extra room so thick yarn does not collide
-    return settings.stitch_width + yarn_width
+    return settings.stitch_width + settings.stitch_width * settings.stitch_gap_ratio
 
 
 def calculate_canvas_size(pattern, settings):
