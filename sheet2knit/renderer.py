@@ -4,24 +4,59 @@ import random
 
 def create_stockinette_stitch_path(settings):
     """
-    Create a path for a single stitch.
-    Mimicks stockinette stitch, with open V shape
+    Create a filled stockinette stitch.
+    Keeps the original diagonal geometry:
+    two separate inclined strands.
+
+    Each strand:
+    - starts as a point
+    - gets thicker in the middle
+    - ends as a point
     """
-    gap = settings.stitch_width * 0.1
 
-    left_x = 0
-    middle_x = settings.stitch_width / 2
-    right_x = settings.stitch_width
+    w = settings.stitch_width
+    h = settings.stitch_height
 
-    top_y = 0
-    bottom_y = settings.stitch_height
+    gap = w * settings.stitch_gap_ratio
+    thickness = w * settings.stitch_thickness_ratio
 
-    return (
-        f"M {left_x} {top_y} "
-        f"L {middle_x - gap} {bottom_y} "
-        f"M {middle_x + gap} {bottom_y} "
-        f"L {right_x} {top_y}"
-    )
+    def tapered_strand(x1, y1, x2, y2):
+        # Direction vector
+        dx = x2 - x1
+        dy = y2 - y1
+
+        length = (dx ** 2 + dy ** 2) ** 0.5
+
+        # Perpendicular vector
+        nx = -dy / length
+        ny = dx / length
+
+        # Points along the ORIGINAL diagonal
+        center_points = [
+            (x1, y1, 0),
+            (x1 + dx * 0.5, y1 + dy * 0.5, thickness),
+            (x2, y2, 0),
+        ]
+
+        left = []
+        right = []
+
+        for x, y, width in center_points:
+            left.append((x + nx * width, y + ny * width))
+            right.append((x - nx * width, y - ny * width))
+
+        points = left + right[::-1]
+
+        return (
+            f"M {points[0][0]} {points[0][1]} "
+            + " ".join(
+                f"L {x} {y}"
+                for x, y in points[1:]
+            )
+            + " Z "
+        )
+
+    return (tapered_strand(0, 0, w / 2 - gap, h) + tapered_strand(w, 0, w / 2 + gap, h))
 
 def calculate_yarn_thickness(settings):
     return settings.stitch_height * 0.4
@@ -66,15 +101,8 @@ def get_stitch_transform(x, y, settings):
     if not settings.randomize:
         return f"translate({x},{y})"
 
-    rotation = random.uniform(
-        -settings.random_rotation,
-        settings.random_rotation
-    )
-
-    scale = random.uniform(
-        1 - settings.random_scale,
-        1 + settings.random_scale
-    )
+    rotation = random.uniform(-settings.random_rotation, settings.random_rotation)
+    scale = random.uniform(1 - settings.random_scale, 1 + settings.random_scale)
 
     return (
         f"translate({x},{y}) "

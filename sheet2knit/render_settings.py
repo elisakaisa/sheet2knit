@@ -11,3 +11,7 @@ class RenderSettings:
     randomize: bool = True
     random_rotation: float = 3
     random_scale: float = 0.07
+
+    # Stockinette stitch appearance
+    stitch_gap_ratio: float = 0.10  # gap between the two halves of the stitch, as a fraction of stitch width
+    stitch_thickness_ratio: float = 0.08
