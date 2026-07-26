@@ -32,12 +32,14 @@ docker compose build
 
 Place one or more Excel pattern files in the sample directory:
 
+```text
 sheet2knit/
 ├── sample/
 │   ├── mittens.xlsx
 │   └── socks.xlsx
 ├── compose.yaml
 └── ...
+```
 
 Run:
 ```bash
@@ -46,11 +48,13 @@ docker compose run --rm sheet2knit
 
 An SVG file will be generated next to each input spreadsheet:
 
+```text
 sample/
 ├── mittens.xlsx
 ├── mittens.svg
 ├── socks.xlsx
 └── socks.svg
+```
 
 Open the generated SVG in a web browser, VS Code, or any SVG-compatible viewer.
 
