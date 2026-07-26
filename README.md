@@ -1,5 +1,7 @@
 # sheet2knit
 
+<img width="1004" height="900" alt="image" src="https://github.com/user-attachments/assets/7a8bcda4-d7ba-4a48-9669-20f7c9c1e566" />
+
 Convert coloured spreadsheet patterns into SVG knitting charts.
 
 `sheet2knit` reads an Excel spreadsheet where each cell's background colour represents a stitch colour, then renders the pattern as a simple stockinette-style SVG visualization.
