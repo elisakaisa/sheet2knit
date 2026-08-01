@@ -1,6 +1,5 @@
 # sheet2knit
-
-<img width="1004" height="900" alt="image" src="https://github.com/user-attachments/assets/7a8bcda4-d7ba-4a48-9669-20f7c9c1e566" />
+![alt text](image.png)
 
 Convert coloured spreadsheet patterns into SVG knitting charts.
 
@@ -15,7 +14,7 @@ Some randomness in rotation and scale is applied, as well as some shading on the
 * Reads `.xlsx` knitting patterns
 * Converts cell background colours into stitch colours
 * Outputs scalable SVG files
-* Keeps the pattern representation separate from the renderer
+* Optional repeated pattern preview (default 3×3)
 
 ## Quick start (Docker)
 
@@ -48,17 +47,19 @@ Run:
 docker compose run --rm sheet2knit
 ```
 
-An SVG file will be generated next to each input spreadsheet:
+SVG files will be generated next to each input spreadsheet:
 
 ```text
 sample/
 ├── mittens.xlsx
 ├── mittens.svg
+├── mittens-repeat.svg
 ├── socks.xlsx
-└── socks.svg
+├── socks.svg
+└── socks-repeat.svg
 ```
 
-Open the generated SVG in a web browser, VS Code, or any SVG-compatible viewer.
+Open the generated SVGs in a web browser, VS Code, or any SVG-compatible viewer.
 
 ## Running locally with Python
 

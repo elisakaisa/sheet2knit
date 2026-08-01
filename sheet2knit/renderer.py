@@ -2,6 +2,7 @@ import svgwrite
 import random
 
 from .colors import adjust_colour
+from .layout import calculate_canvas_size, calculate_stitch_position
 from .transforms import add_offset_to_transform, get_stitch_transform
 
 def create_stockinette_stitch_path(settings):
@@ -87,38 +88,48 @@ def draw_stockinette_stitch(dwg, x, y, colour, settings):
     for fill, dx, dy in layers:
         draw_stitch_layer(fill, dx, dy)
 
-def calculate_stitch_pitch(settings):
-    return settings.stitch_width + settings.stitch_width * settings.stitch_gap_ratio
-
-
-def calculate_canvas_size(pattern, settings):
-    pitch = calculate_stitch_pitch(settings)
-
-    width = pattern.width * pitch * settings.stitch_x_spacing + settings.margin * 2
-    height = pattern.height * settings.stitch_height + settings.margin * 2
-
-    return width, height
-
-
-def calculate_stitch_position(col, row, settings):
-    pitch = calculate_stitch_pitch(settings)
-
-    x = settings.margin + col * pitch * settings.stitch_x_spacing
-    y = settings.margin + row * settings.stitch_height * settings.stitch_y_spacing
-
-    return x, y
-
-def draw_pattern(pattern, filename, settings):
-    width, height = calculate_canvas_size(pattern, settings)
-
+def render_pattern(pattern, filename, settings, repeat_x=1, repeat_y=1):
+    width, height = calculate_canvas_size(
+        pattern.width * repeat_x,
+        pattern.height * repeat_y,
+        settings
+    )
+    
     dwg = svgwrite.Drawing(filename, size=(f"{width}px", f"{height}px"))
 
-    for row in range(pattern.height):
-        for col in range(pattern.width):
-            colour = pattern[col, row]
+    for ry in range(repeat_y):
+        for rx in range(repeat_x):
 
-            if colour is not None:
-                x, y = calculate_stitch_position(col, row, settings)
-                draw_stockinette_stitch(dwg, x, y, colour, settings)
+            x_offset = rx * pattern.width
+            y_offset = ry * pattern.height
 
+            for row in range(pattern.height):
+                for col in range(pattern.width):
+
+                    colour = pattern[col, row]
+                    if colour is None:
+                        continue
+
+                    x, y = calculate_stitch_position(
+                        col + x_offset,
+                        row + y_offset,
+                        settings,
+                    )
+
+                    draw_stockinette_stitch(dwg, x, y, colour, settings)
     dwg.save()
+
+# def draw_pattern(pattern, filename, settings):
+#     width, height = calculate_canvas_size(pattern, settings)
+
+#     dwg = svgwrite.Drawing(filename, size=(f"{width}px", f"{height}px"))
+
+#     for row in range(pattern.height):
+#         for col in range(pattern.width):
+#             colour = pattern[col, row]
+
+#             if colour is not None:
+#                 x, y = calculate_stitch_position(col, row, settings)
+#                 draw_stockinette_stitch(dwg, x, y, colour, settings)
+
+#     dwg.save()
