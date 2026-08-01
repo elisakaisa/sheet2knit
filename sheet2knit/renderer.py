@@ -1,5 +1,4 @@
 import svgwrite
-import random
 
 from .colors import adjust_colour
 from .layout import calculate_canvas_size, calculate_stitch_position
@@ -88,6 +87,13 @@ def draw_stockinette_stitch(dwg, x, y, colour, settings):
     for fill, dx, dy in layers:
         draw_stitch_layer(fill, dx, dy)
 
+def render_single_stitch(dwg, col, row, colour, settings):
+    x, y = calculate_stitch_position(col, row, settings)
+    draw_stockinette_stitch(dwg, x, y, colour, settings)
+
+def create_svg(filename, width, height):
+    return svgwrite.Drawing(filename, size=(f"{width}px", f"{height}px"))
+
 def render_pattern(pattern, filename, settings, repeat_x=1, repeat_y=1):
     width, height = calculate_canvas_size(
         pattern.width * repeat_x,
@@ -95,7 +101,7 @@ def render_pattern(pattern, filename, settings, repeat_x=1, repeat_y=1):
         settings
     )
     
-    dwg = svgwrite.Drawing(filename, size=(f"{width}px", f"{height}px"))
+    dwg = create_svg(filename, width, height)
 
     for ry in range(repeat_y):
         for rx in range(repeat_x):
@@ -110,29 +116,21 @@ def render_pattern(pattern, filename, settings, repeat_x=1, repeat_y=1):
                     if colour is None:
                         continue
 
-                    x, y = calculate_stitch_position(
-                        col + x_offset,
-                        row + y_offset,
-                        settings,
-                    )
-
-                    draw_stockinette_stitch(dwg, x, y, colour, settings)
+                    render_single_stitch(dwg, col + x_offset, row + y_offset, colour, settings)
     dwg.save()
 
 def render_jog_pattern(pattern, filename, settings, jog_column):
     width, height = calculate_canvas_size(pattern.width * 3, pattern.height + 1, settings)
 
-    dwg = svgwrite.Drawing(filename, size=(f"{width}px", f"{height}px"))
+    dwg = create_svg(filename, width, height)
 
     absolute_jog_column = pattern.width + jog_column
 
     for row in range(-1, pattern.height):
         for col in range(pattern.width * 3):
 
-            # Which repeat are we in?
             pattern_col = col % pattern.width
 
-            # Middle repeat gets the jog
             if col >= absolute_jog_column:
                 pattern_row = row + 1
             else:
@@ -146,9 +144,7 @@ def render_jog_pattern(pattern, filename, settings, jog_column):
             if colour is None:
                 continue
 
-            x, y = calculate_stitch_position(col, row + 1, settings)
-
-            draw_stockinette_stitch(dwg, x, y, colour, settings)
+            render_single_stitch(dwg, col, row + 1, colour, settings)
 
     dwg.save()
 
