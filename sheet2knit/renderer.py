@@ -4,6 +4,8 @@ from .colors import adjust_colour
 from .layout import calculate_canvas_size, calculate_stitch_position
 from .transforms import add_offset_to_transform, get_stitch_transform
 
+_stockinette_stitch_path_cache = {}
+
 def create_stockinette_stitch_path(settings):
     """
     Create a filled stockinette stitch.
@@ -63,9 +65,21 @@ def create_stockinette_stitch_path(settings):
 
     return left_strand + right_strand
 
+def get_stockinette_stitch_path(settings):
+    key = (
+        settings.stitch_width,
+        settings.stitch_height,
+        settings.stitch_gap_ratio,
+        settings.stitch_thickness_ratio,
+    )
+
+    if key not in _stockinette_stitch_path_cache:
+        _stockinette_stitch_path_cache[key] = create_stockinette_stitch_path(settings)
+
+    return _stockinette_stitch_path_cache[key]
 
 def draw_stockinette_stitch(dwg, x, y, colour, settings):
-    stich_path = create_stockinette_stitch_path(settings)
+    stich_path = get_stockinette_stitch_path(settings)
     transform = get_stitch_transform(x, y, settings)
 
     def draw_stitch_layer(fill_colour, offset_x=0, offset_y=0):
@@ -120,31 +134,35 @@ def render_pattern(pattern, filename, settings, repeat_x=1, repeat_y=1):
     dwg.save()
 
 def render_jog_pattern(pattern, filename, settings, jog_column):
-    width, height = calculate_canvas_size(pattern.width * 3, pattern.height + 1, settings)
+    repeat_y = 2
+    width, height = calculate_canvas_size(pattern.width * 3, pattern.height * repeat_y + 1, settings)
 
     dwg = create_svg(filename, width, height)
 
     absolute_jog_column = pattern.width + jog_column
 
-    for row in range(-1, pattern.height):
-        for col in range(pattern.width * 3):
+    for row_repeat in range(repeat_y):
+        y_offset = row_repeat * pattern.height
 
-            pattern_col = col % pattern.width
+        for row in range(-1, pattern.height):
+            for col in range(pattern.width * 3):
 
-            if col >= absolute_jog_column:
-                pattern_row = row + 1
-            else:
-                pattern_row = row
+                pattern_col = col % pattern.width
 
-            if pattern_row < 0 or pattern_row >= pattern.height:
-                continue
+                if col >= absolute_jog_column:
+                    pattern_row = row + 1
+                else:
+                    pattern_row = row
 
-            colour = pattern[pattern_col, pattern_row]
+                if pattern_row < 0 or pattern_row >= pattern.height:
+                    continue
 
-            if colour is None:
-                continue
+                colour = pattern[pattern_col, pattern_row]
 
-            render_single_stitch(dwg, col, row + 1, colour, settings)
+                if colour is None:
+                    continue
+
+                render_single_stitch(dwg, col, row + 1 + y_offset, colour, settings)
 
     dwg.save()
 

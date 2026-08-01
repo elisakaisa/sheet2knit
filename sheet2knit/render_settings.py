@@ -3,7 +3,7 @@ from dataclasses import dataclass
 @dataclass
 class RenderSettings:
     stitch_width: int = 70
-    stitch_height: int = 60
+    stitch_height: int = 70
 
     stitch_x_spacing: float = 1.05    # <1 more compact, >1 more spaced out
     stitch_y_spacing: float = 0.86   # <1 more compact, >1 more spaced out

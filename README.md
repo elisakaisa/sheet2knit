@@ -15,6 +15,7 @@ Some randomness in rotation and scale is applied, as well as some shading on the
 * Converts cell background colours into stitch colours
 * Outputs scalable SVG files
 * Optional repeated pattern preview (default 3×3)
+* Optional jog simulation, to see how the jog when knitting in the round would affect the pattern (the performance of the operation is affected by the size of the pattern, smaller is recommended)
 
 ## Quick start (Docker)
 
