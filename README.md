@@ -54,9 +54,17 @@ sample/
 ├── mittens.xlsx
 ├── mittens.svg
 ├── mittens-repeat.svg
+├── mittens-jogsimulations/
+|   ├── mittens-jog1.svg
+|   ├── mittens-jog2.svg
+|   └── mittens-jog3.svg
 ├── socks.xlsx
 ├── socks.svg
-└── socks-repeat.svg
+├── socks-repeat.svg
+└── socks-jogsimulations/
+    ├── socks-jog1.svg
+    ├── socks-jog2.svg
+    └── socks-jog3.svg
 ```
 
 Open the generated SVGs in a web browser, VS Code, or any SVG-compatible viewer.

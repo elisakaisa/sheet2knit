@@ -119,17 +119,36 @@ def render_pattern(pattern, filename, settings, repeat_x=1, repeat_y=1):
                     draw_stockinette_stitch(dwg, x, y, colour, settings)
     dwg.save()
 
-# def draw_pattern(pattern, filename, settings):
-#     width, height = calculate_canvas_size(pattern, settings)
+def render_jog_pattern(pattern, filename, settings, jog_column):
+    width, height = calculate_canvas_size(pattern.width * 3, pattern.height + 1, settings)
 
-#     dwg = svgwrite.Drawing(filename, size=(f"{width}px", f"{height}px"))
+    dwg = svgwrite.Drawing(filename, size=(f"{width}px", f"{height}px"))
 
-#     for row in range(pattern.height):
-#         for col in range(pattern.width):
-#             colour = pattern[col, row]
+    absolute_jog_column = pattern.width + jog_column
 
-#             if colour is not None:
-#                 x, y = calculate_stitch_position(col, row, settings)
-#                 draw_stockinette_stitch(dwg, x, y, colour, settings)
+    for row in range(-1, pattern.height):
+        for col in range(pattern.width * 3):
 
-#     dwg.save()
+            # Which repeat are we in?
+            pattern_col = col % pattern.width
+
+            # Middle repeat gets the jog
+            if col >= absolute_jog_column:
+                pattern_row = row + 1
+            else:
+                pattern_row = row
+
+            if pattern_row < 0 or pattern_row >= pattern.height:
+                continue
+
+            colour = pattern[pattern_col, pattern_row]
+
+            if colour is None:
+                continue
+
+            x, y = calculate_stitch_position(col, row + 1, settings)
+
+            draw_stockinette_stitch(dwg, x, y, colour, settings)
+
+    dwg.save()
+
